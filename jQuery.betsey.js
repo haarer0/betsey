@@ -20,7 +20,7 @@
 	}
 
 	var _settings = {
-		moviesRootURL : window.location + '/content/',
+		moviesRootURL : window.location + 'content/',
 		moviePropertiesFileName : 'properties.js'
 	}
 
