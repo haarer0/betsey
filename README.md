@@ -1,0 +1,4 @@
+betsey
+======
+
+Betsey JS library
