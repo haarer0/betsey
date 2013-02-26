@@ -1,7 +1,7 @@
 var movieProperties = {
 	fileExtensions : 'png',
 	startFromFrame : 0,
-	totalFrames : 5,
+	totalFrames : 36,
 
 	background : '#171717',
 
@@ -18,8 +18,8 @@ var movieProperties = {
 		'front_logo' : {
 			name : 'Toyota logo (front)',
 			variants : {
-				'blue' : 'blue plastic',
-				'metallic' : 'in metallic'
+				'metallic' : 'in metallic',
+				'blue' : 'blue plastic'
 			}
 		}
 	}
