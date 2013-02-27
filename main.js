@@ -191,9 +191,31 @@ $(document).ready(function() {
 		nZoomTimer = null;		
 	}
 
-	var oldScale = 1;
+	Hammer.plugins.showTouches();
+	Hammer.plugins.fakeMultitouch();
+	var nCurrentScale = 1;
+	var oldScale = null;
 	hHammer.on('transform', function(ev){
-		LogMessage('scale = ' + ev.scale);
+		var scale = Math.round((ev.gesture.scale / 2) * 100) / 100;
+		if (scale < 0.1) {
+			scale = 0.1;
+		}
+
+		if (scale > 2) {
+			scale = 2;
+		}
+		
+		if (oldScale === null) {
+			oldScale = scale;
+			return;
+		}
+
+		if (Math.abs(oldScale - scale) < 0.1) {
+			return;
+		}
+
+		$('#canvas').betsey('addScale', scale - oldScale);
+		oldScale = scale;
 		return;
 	});
 
