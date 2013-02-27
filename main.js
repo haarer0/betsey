@@ -188,6 +188,13 @@ $(document).ready(function() {
 		nZoomTimer = null;		
 	}
 
+	hHammer.on('pinch', function(){
+		LogMessage('pinched');
+	});
+	hHammer.on('transform', function(){
+		LogMessage('transformed');
+	});
+
 /*
 	$('#canvas').click(function(e) {
 		e.preventDefault();
