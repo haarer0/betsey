@@ -192,8 +192,10 @@ $(document).ready(function() {
 		nZoomTimer = null;		
 	}
 
+	/*
 	Hammer.plugins.showTouches();
 	Hammer.plugins.fakeMultitouch();
+	*/
 	var nCurrentScale = 1;
 	var oldScale = null;
 
