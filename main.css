@@ -21,6 +21,7 @@ body {
 	box-shadow: 0 0 50px 25px #000;
 
 	margin: 0 auto;
+	overflow: hidden;
 }
 
 

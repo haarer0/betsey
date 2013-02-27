@@ -60,7 +60,7 @@ $(document).ready(function() {
 	var nLastDragTime = 0;
 	var nLastX = -1;
 
-	$('html').click(function(e) {
+	$('html, body').click(function(e) {
 		e.preventDefault();
 		e.stopPropagation();
 	})
