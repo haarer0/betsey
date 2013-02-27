@@ -211,8 +211,11 @@
 			return;
 		}
 
-		_LoadFrame(nFrame, function(nFrame) {
-			_aEvents[_aRegisteredEventNames.F_ON_INITIAL_FRAME_LOADED](nFrame);	
+		_LoadFrame(nFrame, function(isFrameAlreadyExists, nFrame) {
+			if (!isFrameAlreadyExists) {
+				_aEvents[_aRegisteredEventNames.F_ON_INITIAL_FRAME_LOADED](nFrame);	
+			}
+
 			_DrawFrame();
 			_PreloadOtherFrames(nFrame);
 		});		
@@ -221,14 +224,18 @@
 	function _PreloadOtherFrames(nExceptFrame) {
 		for (var i = 1; i < _oMovieProperties['totalFrames']; i++) {
 			if (i + nExceptFrame < _oMovieProperties['totalFrames']) {
-				_LoadFrame(nExceptFrame + i, function(nFrame) {
-					_aEvents[_aRegisteredEventNames.F_ON_OTHER_FRAME_LOADED](nFrame);						
+				_LoadFrame(nExceptFrame + i, function(isFrameAlreadyExists, nFrame) {
+					if (!isFrameAlreadyExists) {
+						_aEvents[_aRegisteredEventNames.F_ON_OTHER_FRAME_LOADED](nFrame);
+					}					
 				});
 			} 
 
 			if (nExceptFrame - i >= 0) {
-				_LoadFrame(nExceptFrame - i, function(nFrame) {
-					_aEvents[_aRegisteredEventNames.F_ON_OTHER_FRAME_LOADED](nFrame);						
+				_LoadFrame(nExceptFrame - i, function(isFrameAlreadyExists, nFrame) {
+					if (!isFrameAlreadyExists) {
+						_aEvents[_aRegisteredEventNames.F_ON_OTHER_FRAME_LOADED](nFrame);
+					}						
 				});
 			}
 		}
@@ -238,7 +245,7 @@
 		fCallback = fCallback || function(n) {};
 
 		if (_IsFrameExisted(nFrame)) {
-			fCallback(nFrame);
+			fCallback(true, nFrame);
 			return;
 		}
 
@@ -272,7 +279,7 @@
 							_aImgs[nn][kk][jj] = img;
 
 							if (nTotalLoaded >= nTotalToLoad) {
-								fCallback(nFrame);
+								fCallback(false, nFrame);
 							}
 						};
 
@@ -293,10 +300,10 @@
 			nFrame = _nCurrentFrame;
 		}
 		
-		//console.log('drawing frame ' + nFrame + ', scale: ' + _nCurrentZoom);
+		console.log('drawing frame ' + nFrame + ', scale: ' + _nCurrentZoom);
 		for (var i in _oMovieProperties['parts']) {
 			if ((_aImgs[nFrame] === undefined) || (_aImgs[nFrame][i] === undefined) || (_aImgs[nFrame][i][_oCurrentParts[i]] === undefined)) {
-				//console.log('frame does not exist ' + nFrame + ', part: '+  _oCurrentParts[i]);
+				console.log('frame does not exist ' + nFrame + ', part: '+  _oCurrentParts[i]);
 				return false;
 			}
 		}

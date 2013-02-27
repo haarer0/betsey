@@ -45,11 +45,13 @@ $(document).ready(function() {
 
 	$('#change_to_metallic').click(function(e) {
 		e.preventDefault();
+		nLoadedFrames = 0;
 		$('#canvas').betsey('changePart', 'front_logo', 'metallic');
 	});
 
 	$('#change_to_blue').click(function(e) {
 		e.preventDefault();
+		nLoadedFrames = 0;
 		$('#canvas').betsey('changePart', 'front_logo', 'blue');
 	});
 
