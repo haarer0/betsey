@@ -6,6 +6,7 @@ $(document).ready(function() {
 		movieName: sMovieToLoad		
 	});
 
+	LogMessage('starting v 0.1.1');
 
 	var nTotalFrames = 0;
 	var nLoadedFrames = 0;
