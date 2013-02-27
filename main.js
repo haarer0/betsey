@@ -204,7 +204,7 @@ $(document).ready(function() {
 		if (scale > 2) {
 			scale = 2;
 		}
-		
+
 		if (oldScale === null) {
 			oldScale = scale;
 			return;
@@ -214,6 +214,7 @@ $(document).ready(function() {
 			return;
 		}
 
+		LogMessage('adding scale ' + (scale - oldScale))
 		$('#canvas').betsey('addScale', scale - oldScale);
 		oldScale = scale;
 		return;
