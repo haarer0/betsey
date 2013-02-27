@@ -53,11 +53,17 @@ $(document).ready(function() {
 	});
 
 	var hHammer = $('#canvas').hammer({
-		drag_min_distance: 5		
+		drag_min_distance: 5,
+		stop_browser_behavior : true		
 	});
 
 	var nLastDragTime = 0;
 	var nLastX = -1;
+
+	$('html').click(function(e) {
+		e.preventDefault();
+		e.stopPropagation();
+	})
 
 	hHammer.on('dragstart', function(e) {
 		nLastDragTime = e.gesture.timestamp;
