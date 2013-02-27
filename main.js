@@ -1,6 +1,7 @@
 $(document).ready(function() {
 
 	var sMovieToLoad = 'toyota';
+	var oMovieProps = {};
 	$('#canvas').betsey({
 		movieName: sMovieToLoad		
 	});
@@ -23,7 +24,7 @@ $(document).ready(function() {
 	LogMessage('Loading movie "' + sMovieToLoad + '"');
 	$('#canvas').betsey('addEventListener', 'onMovieLoaded', function(oProps) {
 		nTotalFrames = oProps['totalFrames'];
-
+		oMovieProps = oProps;
 		LogMessage('Movie is loaded! Loading initial frame(' + oProps['startFromFrame'] + ')');
 	});
 	$('#canvas').betsey('addEventListener', 'onInitialFrameLoaded', function(nFrame) {
@@ -65,6 +66,11 @@ $(document).ready(function() {
 	});
 
 	hHammer.on('dragstart', function(e) {
+		nSwipeCounter = 0;
+		if (nSwipeTimer) {
+			clearTimeout(nSwipeTimer);
+		}
+
 		nLastDragTime = e.gesture.timestamp;
 		nLastX = e.gesture.center.pageX - e.target.offsetLeft;
 	});
@@ -89,6 +95,38 @@ $(document).ready(function() {
 		nLastX = nPos;	
 		$('#canvas').betsey(nDeltaX > 0 ? 'drawPrevFrame' : 'drawNextFrame');
 	})
+
+
+
+
+	var nSwipeTimer = null;
+	var nSwipeCounter = 0;
+	var bIsSwipeToRight = false;
+	hHammer.on('swipe', function(e) {
+		if (nSwipeTimer) {
+			clearTimeout(nSwipeTimer);
+		}
+
+		nSwipeCounter = Math.abs(Math.round(e.gesture.velocityX * 20));
+		bIsSwipeToRight = e.gesture.deltaX > 0;
+
+		LogMessage('Swiping ' + (bIsSwipeToRight ? 'right' : 'left') + ' , c: ' + nSwipeCounter);
+
+		DoSwipe();
+	});
+
+	function DoSwipe() {
+		nSwipeCounter--;
+		if (nSwipeCounter < 5) {
+			nSwipeCounter = 5;
+		}
+		if (nSwipeCounter > 95) {
+			nSwipeCounter = 95;
+		}
+
+		$('#canvas').betsey(bIsSwipeToRight ? 'drawPrevFrame' : 'drawNextFrame');
+		nSwipeTimer = setTimeout(DoSwipe, 100 - nSwipeCounter);
+	}
 
 /*
 	$('#canvas').click(function(e) {
