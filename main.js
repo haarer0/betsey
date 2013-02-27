@@ -20,7 +20,7 @@ $(document).ready(function() {
 		hLogBox.prepend('<p><span class="log-time">' + GetElapsedTime() + 's</span>' + sMessage + '</p>');
 	}
 
-	LogMessage('starting v 0.1.1');
+	LogMessage('starting v 0.1.2');
 	LogMessage('Loading movie "' + sMovieToLoad + '"');
 	$('#canvas').betsey('addEventListener', 'onMovieLoaded', function(oProps) {
 		nTotalFrames = oProps['totalFrames'];
@@ -196,9 +196,12 @@ $(document).ready(function() {
 	Hammer.plugins.fakeMultitouch();
 	var nCurrentScale = 1;
 	var oldScale = null;
+
+	hHammer.on('transformstart', function(ev) {
+		oldScale = null;
+	});
+
 	hHammer.on('transform', function(ev){
-		LogMessage('scaling...')
-		console.log('scaling')
 		var scale = Math.round((ev.gesture.scale / 2) * 100) / 100;
 		if (scale < 0.1) {
 			scale = 0.1;
@@ -217,7 +220,6 @@ $(document).ready(function() {
 			return;
 		}
 
-		LogMessage('adding scale ' + (scale - oldScale))
 		$('#canvas').betsey('addScale', scale - oldScale);
 		oldScale = scale;
 		return;
