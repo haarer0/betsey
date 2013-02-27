@@ -56,7 +56,10 @@ $(document).ready(function() {
 
 	var hHammer = $('#canvas').hammer({
 		drag_min_distance: 5,
-		stop_browser_behavior : true		
+		stop_browser_behavior : true,
+
+		transform_min_scale : 0.1,
+		transform_max_scale : 2
 	});
 
 	var nLastDragTime = 0;
@@ -188,11 +191,10 @@ $(document).ready(function() {
 		nZoomTimer = null;		
 	}
 
-	hHammer.on('pinch', function(){
-		LogMessage('pinched');
-	});
-	hHammer.on('transform', function(){
-		LogMessage('transformed');
+	hHammer.on('transform', function(e){
+		console.log(e);
+		return;
+		$('#canvas').betsey('addScale', e.);
 	});
 
 /*
