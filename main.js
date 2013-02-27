@@ -58,7 +58,7 @@ $(document).ready(function() {
 
 			setTimeout(function() {
 				nState = 2;
-			}, 200);
+			}, 100);
 		} 
 
 		if ((nState === 2) && (Math.abs(nPrevX - pos) > 5)) {
