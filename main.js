@@ -137,6 +137,58 @@ $(document).ready(function() {
 		nSwipeTimer = setTimeout(DoSwipe, Math.round(100 - nSwipeCounter));
 	}
 
+
+
+
+	var nZoomTimer = null;
+	$('.zoom').mousedown(function(e) {
+		$(this).addClass('clicked');
+		e.preventDefault();
+	}).mouseup(function(e) {
+		$(this).removeClass('clicked');
+		e.preventDefault();
+		ClearZoomTimer();
+	}).mouseout(function(e) {
+		$(this).removeClass('clicked');
+		e.preventDefault();
+		ClearZoomTimer();
+	});
+
+
+	$('#zoom-in').mousedown(function(e){
+		e.preventDefault();
+
+		if (nZoomTimer) {
+			return;
+		}
+		OnZoomButtonHold(0.1);
+	});
+
+	$('#zoom-out').mousedown(function(e){
+		e.preventDefault();
+		
+		if (nZoomTimer) {
+			return;
+		}
+		OnZoomButtonHold(-0.1);
+	});
+
+	function OnZoomButtonHold(nZoomValue) {
+		$('#canvas').betsey('addScale', nZoomValue);
+
+		nZoomTimer = setTimeout(function() {
+			OnZoomButtonHold(nZoomValue);
+		}, 50);
+	}
+
+	function ClearZoomTimer() {
+		if (!nZoomTimer) {
+			return;
+		}
+		clearTimeout(nZoomTimer);
+		nZoomTimer = null;		
+	}
+
 /*
 	$('#canvas').click(function(e) {
 		e.preventDefault();

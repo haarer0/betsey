@@ -73,6 +73,7 @@ header {
 	text-align: center;
 	margin-bottom: 20px;
 	width: 100%;
+	position: relative;
 }
 
 #canvas {
@@ -113,4 +114,39 @@ header {
 	display: inline-block;
 	color: #fff;
 	width: 50px;
+}
+
+.canvas-controls {
+	position: absolute;
+	top: 15px;
+	left: 25px;
+	width: 16px;
+	height: 50px;
+}
+
+.zooms {
+	position: absolute;
+}
+
+.zoom {
+	width: 16px;
+	height: 16px;
+	cursor: pointer;
+	margin-bottom: 10px;
+}
+
+.zoom.in {
+	background: url(zoom_in.png) 0 0 no-repeat;
+}
+
+.zoom.out {
+	background: url(zoom_out.png) 0 0 no-repeat;
+}
+
+.zoom:hover {
+	background-position: -16px 0;
+}
+
+.zoom.clicked {
+	background-position: -32px 0;
 }
