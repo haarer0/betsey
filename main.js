@@ -1,13 +1,44 @@
 $(document).ready(function() {
 
+	var sMovieToLoad = 'toyota';
 	$('#canvas').betsey({
-		movieName: 'toyota', 
-		events : {
-			onMovieLoaded : function(oProps) {
-				console.log('movie is loaded!');
-			}
-		}
+		movieName: sMovieToLoad		
 	});
+
+
+
+	var nTotalFrames = 0;
+	var nLoadedFrames = 0;
+	var nStartTime = new Date().getTime();
+	function GetElapsedTime() {
+		var s = new Date(new Date().getTime() - nStartTime).getTime();
+		return  s / 1000;
+	}
+
+	var hLogBox = $('#logbox');
+	function LogMessage(sMessage) {
+		hLogBox.prepend('<p><span class="log-time">' + GetElapsedTime() + 's</span>' + sMessage + '</p>');
+	}
+
+	LogMessage('Loading movie "' + sMovieToLoad + '"');
+	$('#canvas').betsey('addEventListener', 'onMovieLoaded', function(oProps) {
+		nTotalFrames = oProps['totalFrames'];
+
+		LogMessage('Movie is loaded! Loading initial frame(' + oProps['startFromFrame'] + ')');
+	});
+	$('#canvas').betsey('addEventListener', 'onInitialFrameLoaded', function(nFrame) {
+		nLoadedFrames++;
+		LogMessage('Initial frame(' + nFrame + ') is loaded! (BG) Loading the rest frames');
+	});
+
+	$('#canvas').betsey('addEventListener', 'onOtherFrameLoaded', function(nFrame) {
+		nLoadedFrames++;
+		LogMessage('Loaded frame(' + nFrame + '), ' + nLoadedFrames + '/' + nTotalFrames + ' ' + (Math.round(nLoadedFrames / nTotalFrames * 100)) + '%');
+	});
+
+
+
+
 
 
 
@@ -21,6 +52,39 @@ $(document).ready(function() {
 		$('#canvas').betsey('changePart', 'front_logo', 'blue');
 	});
 
+	var hHammer = $('#canvas').hammer({
+		drag_min_distance: 5		
+	});
+
+	var nLastDragTime = 0;
+	var nLastX = -1;
+
+	hHammer.on('dragstart', function(e) {
+		nLastDragTime = e.gesture.timestamp;
+		nLastX = e.gesture.center.pageX - e.target.offsetLeft;
+	});
+	hHammer.on('dragend', function(e) {
+		nLastDragTime = 0;
+		nLastX = -1;
+	});
+
+	hHammer.on('drag', function(e) {
+		if (e.gesture.timestamp - nLastDragTime < 30) {
+			return;
+		}
+
+		var nPos = e.gesture.center.pageX - e.target.offsetLeft;
+		var nDeltaX = nPos - nLastX;
+
+		if (Math.abs(nDeltaX) < 10) {
+			return;
+		}
+
+		nLastDragTime = e.gesture.timestamp;
+		nLastX = nPos;	
+		$('#canvas').betsey(nDeltaX > 0 ? 'drawPrevFrame' : 'drawNextFrame');
+	})
+
 /*
 	$('#canvas').click(function(e) {
 		e.preventDefault();
@@ -28,7 +92,7 @@ $(document).ready(function() {
 		$('#canvas').betsey((pos < $(this).width() / 2) ? 'drawPrevFrame' : 'drawNextFrame');
 	});
 */
-
+/*
 	var bIsClicked = false;
 	$('#canvas').mousedown(function(e) {
 		bIsClicked = true;
@@ -42,6 +106,13 @@ $(document).ready(function() {
 
 	var nState = 0;
 	var nPrevX = null;
+	var nPrevY = null;
+
+
+	$('#canvas').mouseout(function(e) {
+		nState = 0;		
+	});
+
 	$('#canvas').mousemove(function(e) {
 		e.preventDefault();
 
@@ -50,22 +121,32 @@ $(document).ready(function() {
 			return false;
 		}
 
-		var pos = e.pageX - $(this).offset().left;
+		var posX = e.pageX - $(this).offset().left;
+		var posY = e.pageY - $(this).offset().top;
 		
 		if (nState === 0) {
 			nState = 1;
-			nPrevX = pos;
+			nPrevX = posX;
+			nPrevY = posY;
 
 			setTimeout(function() {
 				nState = 2;
-			}, 100);
+			}, 5);
 		} 
 
-		if ((nState === 2) && (Math.abs(nPrevX - pos) > 5)) {
-			$('#canvas').betsey((nPrevX - pos < 0) ? 'drawPrevFrame' : 'drawNextFrame');
+		if ((nState === 2)) {
+			if (Math.abs(nPrevX - posX) > 5) {
+				$('#canvas').betsey((nPrevX - posX < 0) ? 'drawPrevFrame' : 'drawNextFrame');
+			}
+
+			if (Math.abs(nPrevY - posY) > 5) {
+				$('#canvas').betsey('addScale', (nPrevY - posY > 0) ? 0.1 : -0.1);
+			}
+
 			nState = 0;			
 		}
 
 		return false;
 	});
+*/
 });

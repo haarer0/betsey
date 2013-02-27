@@ -10,7 +10,6 @@ var movieProperties = {
 			name : 'Car body',
 			variants : {
 				'white' : 'white color',
-				'blue' : 'blue color',
 				'red' : 'red color'
 			}
 		},
