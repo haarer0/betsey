@@ -7,7 +7,6 @@ $(document).ready(function() {
 	});
 
 
-
 	var nTotalFrames = 0;
 	var nLoadedFrames = 0;
 	var nStartTime = new Date().getTime();

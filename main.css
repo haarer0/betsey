@@ -120,8 +120,8 @@ header {
 	position: absolute;
 	top: 15px;
 	left: 25px;
-	width: 16px;
-	height: 50px;
+	width: 32px;
+	height: 70px;
 }
 
 .zooms {
@@ -129,24 +129,27 @@ header {
 }
 
 .zoom {
-	width: 16px;
-	height: 16px;
+	width: 32px;
+	height: 32px;
 	cursor: pointer;
 	margin-bottom: 10px;
+	font-family: Arial;
+	font-size: 32px;
+	background-color: rgba(200, 200, 200, 0.1);
+	color: #666;
+	line-height: 33px;
 }
 
-.zoom.in {
-	background: url(zoom_in.png) 0 0 no-repeat;
-}
-
-.zoom.out {
-	background: url(zoom_out.png) 0 0 no-repeat;
+#zoom-out {
+	line-height: 27px;
 }
 
 .zoom:hover {
-	background-position: -16px 0;
+	color: #bbb;
+	background-color: rgba(200, 200, 200, 0.2);
 }
 
 .zoom.clicked {
-	background-position: -32px 0;
+	color: #fff;
+	background-color: rgba(200, 200, 200, 0.3);
 }
