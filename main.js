@@ -60,10 +60,9 @@ $(document).ready(function() {
 	var nLastDragTime = 0;
 	var nLastX = -1;
 
-	$('html, body').click(function(e) {
+	$(document).bind('touchmove', function(e) {
 		e.preventDefault();
-		e.stopPropagation();
-	})
+	});
 
 	hHammer.on('dragstart', function(e) {
 		nLastDragTime = e.gesture.timestamp;
