@@ -68,11 +68,6 @@ $(document).ready(function() {
 	});
 
 	hHammer.on('dragstart', function(e) {
-		nSwipeCounter = 0;
-		if (nSwipeTimer) {
-			clearTimeout(nSwipeTimer);
-		}
-
 		nLastDragTime = e.gesture.timestamp;
 		nLastX = e.gesture.center.pageX - e.target.offsetLeft;
 	});
@@ -104,18 +99,30 @@ $(document).ready(function() {
 	var nSwipeTimer = null;
 	var nSwipeCounter = 0;
 	var bIsSwipeToRight = false;
+	hHammer.on('tap', function() {
+		StopSwiping();
+	});
+
+	hHammer.on('dragstart', function(e) {
+		StopSwiping();
+	});
+
 	hHammer.on('swipe', function(e) {
-		if (nSwipeTimer) {
-			clearTimeout(nSwipeTimer);
-		}
+		StopSwiping();
 
 		nSwipeCounter = Math.abs(e.gesture.velocityX * 20);
 		bIsSwipeToRight = e.gesture.deltaX > 0;
 
-		LogMessage('Swiping ' + (bIsSwipeToRight ? 'right' : 'left') + ' , c: ' + nSwipeCounter);
+		LogMessage('Swiping ' + (bIsSwipeToRight ? 'right' : 'left') + ', c: ' + nSwipeCounter);
 
 		DoSwipe();
 	});
+
+	function StopSwiping() {
+		if (nSwipeTimer) {
+			clearTimeout(nSwipeTimer);
+		}
+	}
 
 	function DoSwipe() {
 		nSwipeCounter -= 0.2;
