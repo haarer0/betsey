@@ -192,11 +192,10 @@ $(document).ready(function() {
 	}
 
 	var oldScale = 1;
-	hHammer.on('transform', function(e){
+	hHammer.on('transform', function(ev){
 		var scale = 1 + ev.scale – oldScale;
 		LogMessage('scale = ' + scale);
 		return;
-		$('#canvas').betsey('addScale', e.);
 	});
 
 /*
