@@ -188,7 +188,7 @@
 				_LoadFrame(nExceptFrame + i);
 			} 
 
-			if (nExceptFrame - i > 0) {
+			if (nExceptFrame - i >= 0) {
 				_LoadFrame(nExceptFrame - i);
 			}
 		}
@@ -253,11 +253,12 @@
 			nFrame = _nCurrentFrame;
 		}
 		
-		console.log('drawing frame ' + nFrame)
+		console.log('drawing frame ' + nFrame + ', params: ' + _oCurrentParts['front_logo']);
 
 		_ClearCanvas();
 		for (var i in _oMovieProperties['parts']) {
 			if ((_aImgs[nFrame] === undefined) || (_aImgs[nFrame][i] === undefined) || (_aImgs[nFrame][i][_oCurrentParts[i]] === undefined)) {
+				console.log('frame does not exist ' + nFrame + ', part: '+  _oCurrentParts[i]);
 				return false;
 			}
 
