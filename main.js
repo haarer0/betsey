@@ -107,7 +107,7 @@ $(document).ready(function() {
 			clearTimeout(nSwipeTimer);
 		}
 
-		nSwipeCounter = Math.abs(Math.round(e.gesture.velocityX * 20));
+		nSwipeCounter = Math.abs(e.gesture.velocityX * 20);
 		bIsSwipeToRight = e.gesture.deltaX > 0;
 
 		LogMessage('Swiping ' + (bIsSwipeToRight ? 'right' : 'left') + ' , c: ' + nSwipeCounter);
@@ -116,7 +116,7 @@ $(document).ready(function() {
 	});
 
 	function DoSwipe() {
-		nSwipeCounter--;
+		nSwipeCounter -= 0.2;
 		if (nSwipeCounter < 5) {
 			nSwipeCounter = 5;
 		}
@@ -125,7 +125,7 @@ $(document).ready(function() {
 		}
 
 		$('#canvas').betsey(bIsSwipeToRight ? 'drawPrevFrame' : 'drawNextFrame');
-		nSwipeTimer = setTimeout(DoSwipe, 100 - nSwipeCounter);
+		nSwipeTimer = setTimeout(DoSwipe, Math.round(100 - nSwipeCounter));
 	}
 
 /*
