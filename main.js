@@ -193,7 +193,7 @@ $(document).ready(function() {
 
 	var oldScale = 1;
 	hHammer.on('transform', function(ev){
-		var scale = 1 + ev.scale – oldScale;
+		var scale = 1 + ev.scale - oldScale;
 		LogMessage('scale = ' + scale);
 		return;
 	});
