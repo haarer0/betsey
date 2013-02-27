@@ -61,7 +61,7 @@ $(document).ready(function() {
 			}, 200);
 		} 
 
-		if ((nState === 2) && (Math.abs(nPrevX - pos) > 10)) {
+		if ((nState === 2) && (Math.abs(nPrevX - pos) > 5)) {
 			$('#canvas').betsey((nPrevX - pos < 0) ? 'drawPrevFrame' : 'drawNextFrame');
 			nState = 0;			
 		}
