@@ -19,8 +19,8 @@ $(document).ready(function() {
 	function LogMessage(sMessage) {
 		hLogBox.prepend('<p><span class="log-time">' + GetElapsedTime() + 's</span>' + sMessage + '</p>');
 	}
-	LogMessage('starting v 0.1.1');
 
+	LogMessage('starting v 0.1.1');
 	LogMessage('Loading movie "' + sMovieToLoad + '"');
 	$('#canvas').betsey('addEventListener', 'onMovieLoaded', function(oProps) {
 		nTotalFrames = oProps['totalFrames'];
