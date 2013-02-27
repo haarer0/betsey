@@ -196,6 +196,7 @@ $(document).ready(function() {
 	var nCurrentScale = 1;
 	var oldScale = null;
 	hHammer.on('transform', function(ev){
+		LogMessage('scaling...')
 		var scale = Math.round((ev.gesture.scale / 2) * 100) / 100;
 		if (scale < 0.1) {
 			scale = 0.1;
