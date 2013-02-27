@@ -191,8 +191,10 @@ $(document).ready(function() {
 		nZoomTimer = null;		
 	}
 
+	var oldScale = 1;
 	hHammer.on('transform', function(e){
-		console.log(e);
+		var scale = 1 + ev.scale – oldScale;
+		LogMessage('scale = ' + scale);
 		return;
 		$('#canvas').betsey('addScale', e.);
 	});
