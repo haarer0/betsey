@@ -9,9 +9,10 @@
 		_oCurrentParts = {},
 		_bIsMovieLoading = false,
 		_oMovieProperties = null,
-		_nCurrentFrame = 0,
 		_aFrames = {},
-		_aEvents = {};
+		_aEvents = {},
+		_nCurrentFrame = 0,
+		_nCurrentZoom = 1;
 
 	var _aRegisteredEventNames = {
 		F_ON_MOVIE_LOADED : 'onMovieLoaded',
@@ -21,7 +22,9 @@
 
 	var _settings = {
 		moviesRootURL : window.location + 'content/',
-		moviePropertiesFileName : 'properties.js'
+		moviePropertiesFileName : 'properties.js',
+		maxZoom : 2.0,
+		minZoom: 0.3
 	}
 
 	var methods = {
@@ -100,6 +103,37 @@
 			}
 		},
 
+		addScale : function(nScaleModifier) {
+			var nPrevZoom = _nCurrentZoom;
+			_nCurrentZoom += nScaleModifier;
+			if (_nCurrentZoom < _settings['minZoom']) {
+				_nCurrentZoom = _settings['minZoom'];
+			}
+			if (_nCurrentZoom > _settings['maxZoom']) {
+				_nCurrentZoom = _settings['maxZoom'];
+			}
+
+			if (nPrevZoom !== _nCurrentZoom) {
+				_DrawFrame();
+			}
+		},
+
+		setScale : function(nScaleModifier) {	
+			var nPrevZoom = _nCurrentZoom;		
+			_nCurrentZoom = nScaleModifier;
+			if (_nCurrentZoom < _settings['minZoom']) {
+				_nCurrentZoom = _settings['minZoom'];
+			}
+			if (_nCurrentZoom > _settings['maxZoom']) {
+				_nCurrentZoom = _settings['maxZoom'];
+			}
+
+
+			if (nPrevZoom !== _nCurrentZoom) {
+				_DrawFrame();
+			}
+		},
+
 		__getImgs : function() {
 			console.log(_aImgs);
 		}
@@ -140,7 +174,6 @@
 		_aEvents[_aRegisteredEventNames.F_ON_MOVIE_LOADED](movieProperties);
 
 		_PreloadAndDraw(_oMovieProperties['startFromFrame']);
-		_PreloadOtherFrames(_oMovieProperties['startFromFrame']);
 	}
 
 	function _OnLoadingMovieFailed(jqxhr, settings, exception) {
@@ -151,7 +184,6 @@
 	function _ChangePart(sPartName, sVariant) {
 		_oCurrentParts[sPartName] = sVariant;
 		_PreloadAndDraw(_nCurrentFrame);
-		_PreloadOtherFrames(_nCurrentFrame);
 	}
 
 	function _GetImgFullPath(sPart, nFrame) {
@@ -179,17 +211,32 @@
 			return;
 		}
 
-		_LoadFrame(nFrame, _DrawFrame);		
+		_LoadFrame(nFrame, function(isFrameAlreadyExists, nFrame) {
+			if (!isFrameAlreadyExists) {
+				_aEvents[_aRegisteredEventNames.F_ON_INITIAL_FRAME_LOADED](nFrame);	
+			}
+
+			_DrawFrame();
+			_PreloadOtherFrames(nFrame);
+		});		
 	}
 
 	function _PreloadOtherFrames(nExceptFrame) {
 		for (var i = 1; i < _oMovieProperties['totalFrames']; i++) {
 			if (i + nExceptFrame < _oMovieProperties['totalFrames']) {
-				_LoadFrame(nExceptFrame + i);
+				_LoadFrame(nExceptFrame + i, function(isFrameAlreadyExists, nFrame) {
+					if (!isFrameAlreadyExists) {
+						_aEvents[_aRegisteredEventNames.F_ON_OTHER_FRAME_LOADED](nFrame);
+					}					
+				});
 			} 
 
 			if (nExceptFrame - i >= 0) {
-				_LoadFrame(nExceptFrame - i);
+				_LoadFrame(nExceptFrame - i, function(isFrameAlreadyExists, nFrame) {
+					if (!isFrameAlreadyExists) {
+						_aEvents[_aRegisteredEventNames.F_ON_OTHER_FRAME_LOADED](nFrame);
+					}						
+				});
 			}
 		}
 	}
@@ -198,7 +245,7 @@
 		fCallback = fCallback || function(n) {};
 
 		if (_IsFrameExisted(nFrame)) {
-			fCallback(nFrame);
+			fCallback(true, nFrame);
 			return;
 		}
 
@@ -232,7 +279,7 @@
 							_aImgs[nn][kk][jj] = img;
 
 							if (nTotalLoaded >= nTotalToLoad) {
-								fCallback(nFrame);
+								fCallback(false, nFrame);
 							}
 						};
 
@@ -253,18 +300,20 @@
 			nFrame = _nCurrentFrame;
 		}
 		
-		console.log('drawing frame ' + nFrame + ', params: ' + _oCurrentParts['front_logo']);
-
-		_ClearCanvas();
+		console.log('drawing frame ' + nFrame + ', scale: ' + _nCurrentZoom);
 		for (var i in _oMovieProperties['parts']) {
 			if ((_aImgs[nFrame] === undefined) || (_aImgs[nFrame][i] === undefined) || (_aImgs[nFrame][i][_oCurrentParts[i]] === undefined)) {
 				console.log('frame does not exist ' + nFrame + ', part: '+  _oCurrentParts[i]);
 				return false;
 			}
+		}
 
-			_hContext.drawImage(_aImgs[nFrame][i][_oCurrentParts[i]], 0, 0);
-		}			
-
+		_ClearCanvas();
+		for (var i in _oMovieProperties['parts']) {
+			var nNewW = _nCanvasW * _nCurrentZoom;
+			var nNewH = _nCanvasH * _nCurrentZoom;
+			_hContext.drawImage(_aImgs[nFrame][i][_oCurrentParts[i]], (_nCanvasW - nNewW) / 2, (_nCanvasH - nNewH) / 2, nNewW, nNewH);
+		}		
 		return true;
 	}
 
