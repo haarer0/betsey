@@ -282,62 +282,6 @@
 	function _LoadFrame(nFrame, fCallback) {
 		fCallback = fCallback || function(n) {};
 
-
-/*test
-nFrame = 0;
-_aImgs = {
-	'base' : {
-		type : 'background',
-		base_frames : {
-			'0' : true,
-			'1' : true
-		}
-	},
-
-	'body' : {
-		type : 'color_overlay',
-		base_frames : {
-			'0' : true,
-			'1' : true
-		},
-		variants : {
-			'white' : {
-				'0' : true,
-				'1' : true
-			},
-			'red' : {
-				'0' : true,
-				'1' : true
-			}	
-		}
-	},
-
-	'front_logo' : {
-		type : 'solid',
-		variants : {
-			'metallic' : {
-				'0' : true,
-				'1' : true
-			},
-			'red' : {
-				'0' : true,
-				'1' : true
-			}	
-		}
-	},
-
-	'wheels' : {
-		type : 'solid',
-		variants : {
-			'default_15in' : {
-				'0' : true,
-				'1' : true
-			}
-		}
-	}
-};*/
-
-
 		var bIsAlreadyLoaded = true,
 			aImgsToLoad = {},			
 			nToLoad = 0,
@@ -399,7 +343,13 @@ _aImgs = {
 						if (vv === '__betsey_base') {
 							_aImgs[pp].base_frames = _aImgs[pp].base_frames || {};
 							_aImgs[pp].base_frames[ff] = img;
-						} else {							
+
+							if (_oMovieProperties.parts[pp].type === PART_TYPE_COLOR_OVERLAY) {
+								_aImgs[pp].variants = _aImgs[pp].variants || {};
+								_aImgs[pp].variants[_oCurrentPartVariants[pp]] = _aImgs[pp].variants[_oCurrentPartVariants[pp]] || {};
+								_aImgs[pp].variants[_oCurrentPartVariants[pp]][ff] = _ApplyColorChanging(img, _oMovieProperties.parts[pp].variants[_oCurrentPartVariants[pp]].color_modification);
+							}
+						} else {
 							_aImgs[pp].variants = _aImgs[pp].variants || {};
 							_aImgs[pp].variants[vv] = _aImgs[pp].variants[vv] || {};
 							_aImgs[pp].variants[vv][ff] = img;
@@ -418,14 +368,49 @@ _aImgs = {
 
 
 	function _ApplyColorChanging(img, colorParams) {
-		return img;
-		_hContext.save();
+		var oldState = _hContext.getImageData(0, 0, _nCanvasW, _nCanvasH);
 		_hContext.clearRect(0,0, _nCanvasW, _nCanvasH);
 		_hContext.drawImage(img, 0, 0);
 		var pixels = _hContext.getImageData(0, 0, _nCanvasW, _nCanvasH);
-		_hContext.restore();
-		
-		console.log(pixels);
+		var pixData = pixels.data;
+
+		var r, g, b;
+
+		for (var i = 0; i < pixData.length; i += 4) {
+			r = pixData[i + 0] + colorParams.r;
+			if (r < 0)  {
+				r = 0;
+			}
+			if (r > 255) {
+				r = 255;
+			}
+			pixData[i + 0] = r;
+
+			g = pixData[i + 1] + colorParams.g;
+			if (g < 0)  {
+				g = 0;
+			}
+			if (g > 255) {
+				g = 255;
+			}
+			pixData[i + 1] = g;
+
+
+			b = pixData[i + 1] + colorParams.b;
+			if (b < 0)  {
+				b = 0;
+			}
+			if (b > 255) {
+				b = 255;
+			}
+			pixData[i + 2] = b;
+		}
+
+		_hContext.putImageData(pixels, 0, 0);
+		var newImage = new Image();
+		newImage.src = _$canvas[0].toDataURL('image/png');
+		_hContext.putImageData(oldState, 0, 0);
+		return newImage;
 	}
 
 	function _DrawFrame(nFrame) {
@@ -437,7 +422,6 @@ _aImgs = {
 			var nFrameStartTime = new Date().getTime();
 		}
 
-		console.log('drawing frame ' + nFrame + ', scale: ' + _nCurrentZoom);
 		_ClearCanvas();
 		var nNewW = _nCanvasW * _nCurrentZoom;
 		var nNewH = _nCanvasH * _nCurrentZoom;
@@ -445,6 +429,7 @@ _aImgs = {
 		var nImgDrawn = 0;
 		for (var p in _oMovieProperties.parts) {
 			if (!_IsSpriteExisted(p, _oCurrentPartVariants[p], nFrame)) {
+				console.log('not existed ', p, _oCurrentPartVariants[p], nFrame)
 				continue;
 			}
 
@@ -465,115 +450,11 @@ _aImgs = {
 			_hContext.fillText("zoom: " + _nCurrentZoom, 745, 55);
 
 			_hContext.fillText("RT: " + (new Date().getTime() - nFrameStartTime), 745, 15);
-
 		}
 
-		return true;
-	}
-/*
-
-		
-
-
-	function _IsFrameExisted(nFrame) {
-		var bIsAllPartsReady = true;
-		if (_aImgs[nFrame] !== undefined) {
-			for (var i in _oMovieProperties['parts']) {
-				if (!bIsAllPartsReady || (_aImgs[nFrame][i] === undefined) || (_aImgs[nFrame][i][_oCurrentPartVariants[i]] === undefined)) {
-					bIsAllPartsReady = false;
-				}
-			}
-		} else {
-			bIsAllPartsReady = false;
-		}
-
-		return bIsAllPartsReady;
-	}
-	function _LoadFrame(nFrame, fCallback) {
-		fCallback = fCallback || function(n) {};
-
-		if (_IsFrameExisted(nFrame)) {
-			fCallback(true, nFrame);
-			return;
-		}
-
-
-		var aImgsToLoad = {};
-		var nTotalToLoad = 0;
-		var nTotalLoaded = 0;
-		
-		_aImgs[nFrame] = _aImgs[nFrame] || {};
-
-		for (var i in _oMovieProperties['parts']) {
-			_aImgs[nFrame][i] = _aImgs[nFrame][i] || {};
-			if (_aImgs[nFrame][i][_oCurrentPartVariants[i]] === undefined) {
-				aImgsToLoad[nFrame] = aImgsToLoad[nFrame] || {};
-				aImgsToLoad[nFrame][i] = aImgsToLoad[nFrame][i] || {};
-				aImgsToLoad[nFrame][i][_oCurrentPartVariants[i]] = _GetImgFullPath(i, nFrame);
-				nTotalToLoad++;
-			}
-		}
-
-		for (var n in aImgsToLoad) {
-			n = parseInt(n, 10);
-			for (var k in aImgsToLoad[n]) {
-				for (var j in aImgsToLoad[n][k]) {
-					(function(nn, kk, jj) {
-						var img = new Image();
-						img.onload = function() {
-							nTotalLoaded++;
-							_aImgs[nn] = _aImgs[nn] || {};
-
-							_aImgs[nn][kk] = _aImgs[nn][kk] || 	{
-																	type : _oMovieProperties.parts[kk].type,
-																	parts : {}
-																};
-
-
-							switch (_oMovieProperties.parts[kk].type) {
-								case PART_TYPE_SOLID :
-									_aImgs[nn][kk].parts[jj] = img; 
-									break;
-
-								case PART_TYPE_COLOR_OVERLAY : 
-									_aImgs[nn][kk].parts[jj] = img;
-									break
-							} 
-
-							if (nTotalLoaded >= nTotalToLoad) {
-								fCallback(false, nFrame);
-							}
-						};
-
-						img.src = aImgsToLoad[nn][kk][jj];
-					})(n, k, j);			
-				}
-			}		
-		}
+		return true;		
 	}
 
-	function _DrawFrame(nFrame) {
-		if (nFrame === undefined) {
-			nFrame = _nCurrentFrame;
-		}
-		
-		console.log('drawing frame ' + nFrame + ', scale: ' + _nCurrentZoom);
-		for (var i in _oMovieProperties['parts']) {
-			if ((_aImgs[nFrame] === undefined) || (_aImgs[nFrame][i] === undefined) || (_aImgs[nFrame][i].parts[_oCurrentPartVariants[i]] === undefined)) {
-				console.log('frame does not exist ' + nFrame + ', part: '+  _oCurrentPartVariants[i]);
-				return false;
-			}
-		}
-
-		_ClearCanvas();
-		for (var i in _oMovieProperties['parts']) {
-			var nNewW = _nCanvasW * _nCurrentZoom;
-			var nNewH = _nCanvasH * _nCurrentZoom;
-			_hContext.drawImage(_aImgs[nFrame][i].parts[_oCurrentPartVariants[i]], (_nCanvasW - nNewW) / 2, (_nCanvasH - nNewH) / 2, nNewW, nNewH);
-		}		
-		return true;
-	}
-	*/
 
 	$.fn.betsey = function( method ) {
 		if (!_self) {
