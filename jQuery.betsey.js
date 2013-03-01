@@ -9,9 +9,10 @@
 		_oCurrentParts = {},
 		_bIsMovieLoading = false,
 		_oMovieProperties = null,
-		_nCurrentFrame = 0,
 		_aFrames = {},
-		_aEvents = {};
+		_aEvents = {},
+		_nCurrentFrame = 0,
+		_nCurrentZoom = 1;
 
 	var _aRegisteredEventNames = {
 		F_ON_MOVIE_LOADED : 'onMovieLoaded',
@@ -21,7 +22,10 @@
 
 	var _settings = {
 		moviesRootURL : window.location + 'content/',
-		moviePropertiesFileName : 'properties.js'
+		moviePropertiesFileName : 'properties.js',
+		maxZoom : 2.0,
+		minZoom: 0.3,
+		debug : false
 	}
 
 	var methods = {
@@ -97,6 +101,38 @@
 
 			if (!_DrawFrame()) {
 				_nCurrentFrame = nPrevFrame;	
+			}
+		},
+
+		addScale : function(nScaleModifier) {
+			var nPrevZoom = _nCurrentZoom;
+			_nCurrentZoom += nScaleModifier;
+			if (_nCurrentZoom < _settings['minZoom']) {
+				_nCurrentZoom = _settings['minZoom'];
+			}
+			if (_nCurrentZoom > _settings['maxZoom']) {
+				_nCurrentZoom = _settings['maxZoom'];
+			}
+
+			_nCurrentZoom = Number(_nCurrentZoom.toFixed(1));
+			if (nPrevZoom !== _nCurrentZoom) {
+				_DrawFrame();
+			}
+		},
+
+		setScale : function(nScaleModifier) {	
+			var nPrevZoom = _nCurrentZoom;		
+			_nCurrentZoom = nScaleModifier;
+			if (_nCurrentZoom < _settings['minZoom']) {
+				_nCurrentZoom = _settings['minZoom'];
+			}
+			if (_nCurrentZoom > _settings['maxZoom']) {
+				_nCurrentZoom = _settings['maxZoom'];
+			}
+
+			_nCurrentZoom = Number(_nCurrentZoom.toFixed(1));
+			if (nPrevZoom !== _nCurrentZoom) {
+				_DrawFrame();
 			}
 		},
 
@@ -209,7 +245,7 @@
 		
 		_aImgs[nFrame] = _aImgs[nFrame] || {};
 
-		for (var i in _oMovieProperties['parts']) {
+		for (var i in _oMovieProperties.parts) {
 			_aImgs[nFrame][i] = _aImgs[nFrame][i] || {};
 			if (_aImgs[nFrame][i][_oCurrentParts[i]] === undefined) {
 				aImgsToLoad[nFrame] = aImgsToLoad[nFrame] || {};
@@ -244,7 +280,7 @@
 	}
 
 	function _ClearCanvas() {
-		_hContext.fillStyle = _oMovieProperties['background'];
+		_hContext.fillStyle = _oMovieProperties.background;
 		_hContext.fillRect(0, 0, _nCanvasW, _nCanvasH);
 	}
 
@@ -252,18 +288,36 @@
 		if (nFrame === undefined) {
 			nFrame = _nCurrentFrame;
 		}
-		
+				
+		if (_settings.debug) {
+			var nFrameStartTime = new Date().getTime();
+		}
 //console.log('drawing frame ' + nFrame + ', params: ' + _oCurrentParts['front_logo']);
 
 		_ClearCanvas();
-		for (var i in _oMovieProperties['parts']) {
+		var nNewW = _nCanvasW * _nCurrentZoom;
+		var nNewH = _nCanvasH * _nCurrentZoom;
+		var nImgDrawn = 0;
+
+		for (var i in _oMovieProperties.parts) {
 			if ((_aImgs[nFrame] === undefined) || (_aImgs[nFrame][i] === undefined) || (_aImgs[nFrame][i][_oCurrentParts[i]] === undefined)) {
 //console.log('frame does not exist ' + nFrame + ', part: '+  _oCurrentParts[i]);
 				return false;
 			}
+			_hContext.drawImage(_aImgs[nFrame][i][_oCurrentParts[i]], (_nCanvasW - nNewW) / 2, (_nCanvasH - nNewH) / 2, nNewW, nNewH);
+			nImgDrawn++;
+		}	
 
-			_hContext.drawImage(_aImgs[nFrame][i][_oCurrentParts[i]], 0, 0);
-		}			
+		if (_settings.debug) {
+			_hContext.fillStyle = "white";
+			_hContext.font = "bold 12px Courier";
+			_hContext.textAlign = "right";
+			_hContext.fillText("imgs: " + nImgDrawn, 745, 35);
+			_hContext.fillText("frame: " + nFrame, 745, 45);
+			_hContext.fillText("zoom: " + _nCurrentZoom, 745, 55);
+
+			_hContext.fillText("RT: " + (new Date().getTime() - nFrameStartTime), 745, 15);
+		}		
 
 		return true;
 	}
