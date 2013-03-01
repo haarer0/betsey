@@ -120,36 +120,59 @@ header {
 	position: absolute;
 	top: 15px;
 	left: 25px;
-	width: 32px;
+	width: 60px;
 	height: 70px;
 }
 
-.zooms {
+.canvas-controls-buttons {
 	position: absolute;
+	width: 60px;
+	height: 70px;
 }
 
-.zoom {
+.canvas-controls-button {
 	width: 32px;
 	height: 32px;
 	cursor: pointer;
-	margin-bottom: 10px;
+	position: absolute;
 	font-family: Arial;
 	font-size: 32px;
 	background-color: rgba(200, 200, 200, 0.1);
 	color: #666;
+}
+
+#zoom-in {
 	line-height: 33px;
+	top: 0px;
+	left: 35px;
 }
 
 #zoom-out {
 	line-height: 27px;
+	top: 70px;
+	left: 35px;
 }
 
-.zoom:hover {
+#swipe-left {
+	top: 35px;
+	left: 0px;
+	font-size: 20px;
+	line-height: 32px;
+}
+
+#swipe-right {
+	top: 35px;
+	left: 70px;
+	font-size: 20px;
+	line-height: 32px;
+}
+
+.canvas-controls-button:hover {
 	color: #bbb;
 	background-color: rgba(200, 200, 200, 0.2);
 }
 
-.zoom.clicked {
+.canvas-controls-button.clicked {
 	color: #fff;
 	background-color: rgba(200, 200, 200, 0.3);
 }

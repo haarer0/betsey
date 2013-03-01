@@ -5,106 +5,64 @@ var movieProperties = {
 
 	background : '#171717',
 
-
-
 	parts : {
 		'base' : {
 			name : 'Car base layer',
-			type : 'background',
 			variants : {
-				'base' : {
+				'default' : {
 					name : 'Car base layer'
 				}
 			}
 		},
 
 		'body' : {
-			name : 'Car body color',
-			type : 'color_overlay',
+			name : 'Car color',
 			variants : {
 				'white' : {
-					name : 'White color'
-					color_modification : {a : 0, r : 0, g : 0, b : 0}					
+					name : 'White',
+					_color : '#fff'					
 				},
-
+				'black' : {
+					name : 'Black',
+					_color : '#000'					
+				},
 				'red' : {
-					name : 'Red color'
-					color_modification : {a : 0, r : 100, g : 0, b : 0}					
+					name : 'Red',
+					_color : '#f00'					
 				},
-
-				'blue' : {
-					name : 'White color'
-					color_modification : {a : 0, r : 0, g : 0, b : 100}					
-				},
-
 				'green' : {
-					name : 'White color'
-					color_modification : {a : 0, r : 0, g : 100, b : 0}					
-				}
+					name : 'Green',
+					_color : '#0f0'					
+				},
+				'blue' : {
+					name : 'Blue',
+					_color : '#00f'					
+				},
+				'yellow' : {
+					name : 'Yellow',
+					_color : '#ff0'					
+				},
+				'pink' : {
+					name : 'Pink',
+					_color : '#f0f'					
+				},
 			}
 		},
 
 		'front_logo' : {
 			name : 'Front logo',
-			type : 'solid',
 			variants : {
 				'metallic' : {
-					name : 'Default color'
-					color_modification : {a : 0, r : 0, g : 0, b : 0}			
+					name : 'Default',	
+					_color : '#aaa'	
 				},
 				'blue' : {
-					name : 'White color'
-					color_modification : {a : 0, r : 0, g : 0, b : 100}					
+					name : 'Blue',
+					_color : '#a11'		
 				}
-			}
-		},
-
-
-		'wheels' : {
-			name : 'Car wheels',
-			type : 'solid',
-			variants : {
-				'default_15in' : {
-					name : 'Default 15" whhels'
-					color_modification : {a : 0, r : 0, g : 0, b : 0}					
-				},
-
-				'luxury_15in' : {
-					name : 'Luxury 15" whhels'
-					color_modification : {a : 0, r : 0, g : 0, b : 0}					
-				}
-			}
+			},
+			skip_frames : [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]
 		}
-/*
- 	parts : {
-		'body' : {
-			name : 'Car body',
-			type : 'solid',
-			variants : {
-				'white' : {
-					name : 'white color'
-				},
-				'red' : {
-					name : 'red color'
-				}
-			}
-		},
 
-		'front_logo' : {
-			name : 'Toyota logo (front)',
-			type : 'color_overlay',
-			variants : {
-				'metallic' : {
-					color_modification : {a : 0, r : 0, g : 0, b : 0},
-					name : 'in metallic'
-				},
-				'blue' : {
-					color_modification : {a : 0, r : 0, g : 0, b : 100},
-					name : 'blue plastic'
-				},
-				'blue' : 'blue plastic'
-			}
-		}
 	}
-	*/
 }

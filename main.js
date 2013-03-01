@@ -3,7 +3,8 @@ $(document).ready(function() {
 	var sMovieToLoad = 'toyota';
 	var oMovieProps = {};
 	$('#canvas').betsey({
-		movieName: sMovieToLoad		
+		movieName: sMovieToLoad,
+		debug : true	
 	});
 
 
@@ -121,6 +122,27 @@ $(document).ready(function() {
 		DoSwipe();
 	});
 
+
+	$('#swipe-left').click(function(e) {
+		e.preventDefault();
+
+		nSwipeCounter = 75;
+		bIsSwipeToRight = false;
+		LogMessage('Swiping left, c: ' + nSwipeCounter);
+		StopSwiping();
+		DoSwipe();
+	});
+
+	$('#swipe-right').click(function(e) {
+		e.preventDefault();
+
+		nSwipeCounter = 75;
+		bIsSwipeToRight = true;
+		LogMessage('Swiping right, c: ' + nSwipeCounter);
+		StopSwiping();
+		DoSwipe();
+	});
+
 	function StopSwiping() {
 		if (nSwipeTimer) {
 			clearTimeout(nSwipeTimer);
@@ -178,7 +200,7 @@ $(document).ready(function() {
 
 	function OnZoomButtonHold(nZoomValue) {
 		$('#canvas').betsey('addScale', nZoomValue);
-
+		
 		nZoomTimer = setTimeout(function() {
 			OnZoomButtonHold(nZoomValue);
 		}, 50);
