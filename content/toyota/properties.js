@@ -58,7 +58,7 @@ var movieProperties = {
 				},
 				'blue' : {
 					name : 'Blue',
-					_color : '#a11'		
+					_color : '#55a'		
 				}
 			},
 			skip_frames : [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]

@@ -27,6 +27,33 @@ $(document).ready(function() {
 		nTotalFrames = oProps['totalFrames'];
 		oMovieProps = oProps;
 		LogMessage('Movie is loaded! Loading initial frame(' + oProps['startFromFrame'] + ')');
+
+		$('#movieAttrs').html('');
+
+		for (var p in oProps.parts) {
+			var nVariantCount = 0;
+			for (var v in oProps.parts[p].variants) {
+				nVariantCount++;
+			}
+			if (nVariantCount < 2) {
+				continue;
+			}
+
+			var sID = 'options-' + p; 
+			$('#movieAttrs').append('<div class="options" id="' + sID + '"><span class="part-name">' + oProps.parts[p].name + ':</span></div>');
+
+			for (var v in oProps.parts[p].variants) {
+				$('#' + sID).append('<div class="attr-color" style="background-color: ' + oProps.parts[p].variants[v]._color + ';" data-part="' + p + '" data-variant="' + v + '"></div>');				
+			}
+
+			$('.attr-color').click(function(e) {
+				e.preventDefault();
+				var $self = $(this);
+				nLoadedFrames = 0;
+				$('#canvas').betsey('changePartVariant', $self.data('part'), $self.data('variant'));
+			});
+		}
+
 	});
 	$('#canvas').betsey('addEventListener', 'onInitialFrameLoaded', function(nFrame) {
 		nLoadedFrames++;
@@ -42,7 +69,7 @@ $(document).ready(function() {
 
 
 
-
+/*
 
 	$('#change_to_metallic').click(function(e) {
 		e.preventDefault();
@@ -55,7 +82,7 @@ $(document).ready(function() {
 		nLoadedFrames = 0;
 		$('#canvas').betsey('changePart', 'front_logo', 'blue');
 	});
-
+*/
 	var hHammer = $('#canvas').hammer({
 		drag_min_distance: 5,
 		stop_browser_behavior : true,
@@ -200,7 +227,7 @@ $(document).ready(function() {
 
 	function OnZoomButtonHold(nZoomValue) {
 		$('#canvas').betsey('addScale', nZoomValue);
-		
+
 		nZoomTimer = setTimeout(function() {
 			OnZoomButtonHold(nZoomValue);
 		}, 50);
