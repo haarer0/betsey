@@ -1,9 +1,9 @@
 $(document).ready(function() {
 
-	var sMovieToLoad = 'toyota';
 	var oMovieProps = {};
+	var sCurrentMovie = $('#objMovie').val();
+
 	$('#canvas').betsey({
-		movieName: sMovieToLoad,
 		debug : true	
 	});
 
@@ -22,17 +22,44 @@ $(document).ready(function() {
 	}
 
 	LogMessage('starting v 0.1.2');
-	LogMessage('Loading movie "' + sMovieToLoad + '"');
-	$('#canvas').betsey('addEventListener', 'onMovieLoaded', function(oProps) {
+
+
+	$('#canvas').betsey('addEventListener', 'onMoviePropsLoaded', OnMoviePropsLoaded);
+	$('#canvas').betsey('addEventListener', 'onFrameLoaded', OnLoadedFrame);
+	$('#canvas').betsey('addEventListener', 'onAllFramesLoaded', OnAllFramesLoaded);
+
+
+	$('#canvas').betsey('loadMovie', sCurrentMovie);
+	OnBeginLoadingMovie(sCurrentMovie);
+
+	$('#objMovie').change(function(e) {
+		e.preventDefault();
+
+		sCurrentMovie = $('#objMovie').val();
+		$('#canvas').betsey('loadMovie', $(this).value());		
+		OnBeginLoadingMovie(sCurrentMovie);
+	});
+
+	function OnBeginLoadingMovie(sMovieName) {
+		$('#loading-overlay').show();
+		$('#loading-name').html(sMovieName);
+		$('#loading-percents').html('0');
+		$('#loading-curframes').html('0');
+		$('#loading-totalframes').html('0');
+	
+		LogMessage('Loading movie "' + sMovieName + '"');
+	}
+
+	function OnMoviePropsLoaded(oProps) {
 		nTotalFrames = oProps['totalFrames'];
 		oMovieProps = oProps;
-		LogMessage('Movie is loaded! Loading initial frame(' + oProps['startFromFrame'] + ')');
+		$('#loading-totalframes').html(nTotalFrames);
+		LogMessage('Movie props are loaded! Loading initial frame(' + oProps['startFromFrame'] + ')');
 
 		$('#movieAttrs').html('');
-
-		for (var p in oProps.parts) {
+		for (var p in oMovieProps.parts) {
 			var nVariantCount = 0;
-			for (var v in oProps.parts[p].variants) {
+			for (var v in oMovieProps.parts[p].variants) {
 				nVariantCount++;
 			}
 			if (nVariantCount < 2) {
@@ -40,49 +67,54 @@ $(document).ready(function() {
 			}
 
 			var sID = 'options-' + p; 
-			$('#movieAttrs').append('<div class="options" id="' + sID + '"><span class="part-name">' + oProps.parts[p].name + ':</span></div>');
+			$('#movieAttrs').append('<div class="options" id="' + sID + '"><span class="part-name">' + oMovieProps.parts[p].name + ':</span></div>');
 
-			for (var v in oProps.parts[p].variants) {
-				$('#' + sID).append('<div class="attr-color" style="background-color: ' + oProps.parts[p].variants[v]._color + ';" data-part="' + p + '" data-variant="' + v + '"></div>');				
+			for (var v in oMovieProps.parts[p].variants) {
+				$('#' + sID).append('<div class="attr-color" style="background-color: ' + oMovieProps.parts[p].variants[v]._color + ';" data-part="' + p + '" data-variant="' + v + '"></div>');				
 			}
-
-			$('.attr-color').click(function(e) {
-				e.preventDefault();
-				var $self = $(this);
-				nLoadedFrames = 0;
-				$('#canvas').betsey('changePartVariant', $self.data('part'), $self.data('variant'));
-			});
 		}
+			
+		$('.attr-color').click(function(e) {
+			e.preventDefault();
+			var $self = $(this);
+			nLoadedFrames = 0;
+			OnChangedAttrs();
+			$('#canvas').betsey('changePartVariant', $self.data('part'), $self.data('variant'));
+		});
+	}
 
-	});
-	$('#canvas').betsey('addEventListener', 'onInitialFrameLoaded', function(nFrame) {
-		nLoadedFrames++;
-		LogMessage('Initial frame(' + nFrame + ') is loaded! (BG) Loading the rest frames');
-	});
+	function OnChangedAttrs() {
+		$('#loading-overlay').show();
+		$('#loading-name').html(sCurrentMovie);
+		$('#loading-percents').html('0');
+		$('#loading-curframes').html('0');
+		$('#loading-totalframes').html('0');
+		LogMessage('Changed props, reloading movie');	
+	}
 
-	$('#canvas').betsey('addEventListener', 'onOtherFrameLoaded', function(nFrame) {
-		nLoadedFrames++;
-		LogMessage('Loaded frame(' + nFrame + '), ' + nLoadedFrames + '/' + nTotalFrames + ' ' + (Math.round(nLoadedFrames / nTotalFrames * 100)) + '%');
-	});
+	function OnLoadedFrame(nFrame) {
+		nLoadedFrames++;	
+		LogMessage('Loaded frame: ' + nFrame + '/' + nTotalFrames);		
+		$('#loading-curframes').html(nLoadedFrames);
+		$('#loading-percents').html(Math.round((nLoadedFrames / nTotalFrames) * 100));		
+	}
+
+	function OnAllFramesLoaded() {
+		$('#loading-overlay').hide();	
+		LogMessage('All frames are loaded!');
+
+		var aParts = $('#canvas').betsey('getPartVariants');
+		$('#movieAttrs .attr-color').removeClass('active');
+		for (var i in aParts) {
+			$('#options-'+i).find('div[data-variant=' + aParts[i] +']').addClass('active');
+		}	
+	}
 
 
 
 
 
-/*
 
-	$('#change_to_metallic').click(function(e) {
-		e.preventDefault();
-		nLoadedFrames = 0;
-		$('#canvas').betsey('changePart', 'front_logo', 'metallic');
-	});
-
-	$('#change_to_blue').click(function(e) {
-		e.preventDefault();
-		nLoadedFrames = 0;
-		$('#canvas').betsey('changePart', 'front_logo', 'blue');
-	});
-*/
 	var hHammer = $('#canvas').hammer({
 		drag_min_distance: 5,
 		stop_browser_behavior : true,
@@ -169,7 +201,7 @@ $(document).ready(function() {
 		StopSwiping();
 		DoSwipe();
 	});
-	
+
 	function StopSwiping() {
 		if (nSwipeTimer) {
 			clearTimeout(nSwipeTimer);
@@ -241,10 +273,6 @@ $(document).ready(function() {
 		nZoomTimer = null;		
 	}
 
-	/*
-	Hammer.plugins.showTouches();
-	Hammer.plugins.fakeMultitouch();
-	*/
 	var nCurrentScale = 1;
 	var oldScale = null;
 
@@ -275,69 +303,4 @@ $(document).ready(function() {
 		oldScale = scale;
 		return;
 	});
-
-/*
-	$('#canvas').click(function(e) {
-		e.preventDefault();
-		var pos = e.pageX - $(this).offset().left;
-		$('#canvas').betsey((pos < $(this).width() / 2) ? 'drawPrevFrame' : 'drawNextFrame');
-	});
-*/
-/*
-	var bIsClicked = false;
-	$('#canvas').mousedown(function(e) {
-		bIsClicked = true;
-		return false;
-	});
-
-	$('#canvas').mouseup(function(e) {
-		bIsClicked = false;
-		return false;
-	});
-
-	var nState = 0;
-	var nPrevX = null;
-	var nPrevY = null;
-
-
-	$('#canvas').mouseout(function(e) {
-		nState = 0;		
-	});
-
-	$('#canvas').mousemove(function(e) {
-		e.preventDefault();
-
-		if (!bIsClicked) {	
-			nState = 0;
-			return false;
-		}
-
-		var posX = e.pageX - $(this).offset().left;
-		var posY = e.pageY - $(this).offset().top;
-		
-		if (nState === 0) {
-			nState = 1;
-			nPrevX = posX;
-			nPrevY = posY;
-
-			setTimeout(function() {
-				nState = 2;
-			}, 5);
-		} 
-
-		if ((nState === 2)) {
-			if (Math.abs(nPrevX - posX) > 5) {
-				$('#canvas').betsey((nPrevX - posX < 0) ? 'drawPrevFrame' : 'drawNextFrame');
-			}
-
-			if (Math.abs(nPrevY - posY) > 5) {
-				$('#canvas').betsey('addScale', (nPrevY - posY > 0) ? 0.1 : -0.1);
-			}
-
-			nState = 0;			
-		}
-
-		return false;
-	});
-*/
 });

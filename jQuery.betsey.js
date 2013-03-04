@@ -15,9 +15,9 @@
 		_nCurrentZoom = 1;
 
 	var _aRegisteredEventNames = {
-		F_ON_MOVIE_LOADED : 'onMovieLoaded',
-		F_ON_INITIAL_FRAME_LOADED : 'onInitialFrameLoaded',
-		F_ON_OTHER_FRAME_LOADED : 'onOtherFrameLoaded'
+		F_ON_MOVIE_PROPS_LOADED : 		'onMoviePropsLoaded',
+		F_ON_FRAME_LOADED : 			'onFrameLoaded',
+		F_ON_ALL_FRAMES_LOADED : 		'onAllFramesLoaded'
 	}
 
 	var _settings = {
@@ -60,10 +60,11 @@
 			_sCurrentPath = '';
 			_aFrames = {};
 			_hContext = this[0].getContext('2d');
-
+			/*
 			if (options['movieName'] !== undefined) {
 				_LoadMovie(options['movieName']);
 			}
+			*/
 		},
 
 		addEventListener : function(sEventName, fCallback) {
@@ -80,6 +81,10 @@
 
 		changePartVariant : function(sPartName, sVariant) {
 			_ChangePart(sPartName, sVariant);
+		},
+
+		getPartVariants : function() {
+			return _oCurrentParts;
 		},
 
 		drawNextFrame : function() {
@@ -173,10 +178,8 @@
 			}
 		} 
 
-		_aEvents[_aRegisteredEventNames.F_ON_MOVIE_LOADED](movieProperties);
-
-		_PreloadAndDraw(_oMovieProperties['startFromFrame']);
-		_PreloadOtherFrames(_oMovieProperties['startFromFrame']);
+		_aEvents[_aRegisteredEventNames.F_ON_MOVIE_PROPS_LOADED](movieProperties);
+		_PreloadFrames();
 	}
 
 	function _OnLoadingMovieFailed(jqxhr, settings, exception) {
@@ -186,8 +189,7 @@
 
 	function _ChangePart(sPartName, sVariant) {
 		_oCurrentParts[sPartName] = sVariant;
-		_PreloadAndDraw(_nCurrentFrame);
-		_PreloadOtherFrames(_nCurrentFrame);
+		_PreloadFrames();
 	}
 
 	function _GetImgFullPath(sPart, nFrame) {
@@ -209,24 +211,17 @@
 		return bIsAllPartsReady;
 	}
 
-
-	function _PreloadAndDraw(nFrame) {
-		if (!_oMovieProperties) {
-			return;
-		}
-
-		_LoadFrame(nFrame, _DrawFrame);		
-	}
-
-	function _PreloadOtherFrames(nExceptFrame) {
-		for (var i = 1; i < _oMovieProperties['totalFrames']; i++) {
-			if (i + nExceptFrame < _oMovieProperties['totalFrames']) {
-				_LoadFrame(nExceptFrame + i);
-			} 
-
-			if (nExceptFrame - i >= 0) {
-				_LoadFrame(nExceptFrame - i);
-			}
+	function _PreloadFrames() {
+		var nPreloadedFrames = 0;
+		for (var i = 0; i < _oMovieProperties['totalFrames']; i++) {
+			_LoadFrame(i, function(nFrame) {
+				_aEvents[_aRegisteredEventNames.F_ON_FRAME_LOADED](nFrame);
+				if (++nPreloadedFrames >= _oMovieProperties['totalFrames']) {
+console.log('_LoadFrame ' + nPreloadedFrames);
+					_aEvents[_aRegisteredEventNames.F_ON_ALL_FRAMES_LOADED]();
+					_DrawFrame();
+				}
+			});
 		}
 	}
 
@@ -234,6 +229,7 @@
 		fCallback = fCallback || function(n) {};
 
 		if (_IsFrameExisted(nFrame)) {
+console.log('_IsFrameExisted ' + nFrame);
 			fCallback(nFrame);
 			return;
 		}
@@ -253,12 +249,18 @@
 				aImgsToLoad[nFrame][i][_oCurrentParts[i]] = _GetImgFullPath(i, nFrame);
 				nTotalToLoad++;
 			}
+		}				
+		if (nTotalToLoad === 0) {
+			fCallback(nFrame);
+			return;
 		}
 
 		for (var n in aImgsToLoad) {
 			n = parseInt(n, 10);
 			for (var k in aImgsToLoad[n]) {
 				for (var j in aImgsToLoad[n][k]) {
+					//console.log('to load: ' + n + '-' + k + '-' + j);
+
 					(function(nn, kk, jj) {
 						var img = new Image();
 						img.onload = function() {
