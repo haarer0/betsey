@@ -217,7 +217,6 @@
 			_LoadFrame(i, function(nFrame) {
 				_aEvents[_aRegisteredEventNames.F_ON_FRAME_LOADED](nFrame);
 				if (++nPreloadedFrames >= _oMovieProperties['totalFrames']) {
-console.log('_LoadFrame ' + nPreloadedFrames);
 					_aEvents[_aRegisteredEventNames.F_ON_ALL_FRAMES_LOADED]();
 					_DrawFrame();
 				}
@@ -229,7 +228,6 @@ console.log('_LoadFrame ' + nPreloadedFrames);
 		fCallback = fCallback || function(n) {};
 
 		if (_IsFrameExisted(nFrame)) {
-console.log('_IsFrameExisted ' + nFrame);
 			fCallback(nFrame);
 			return;
 		}

@@ -45,9 +45,20 @@ $(document).ready(function() {
 		$('#loading-name').html(sMovieName);
 		$('#loading-percents').html('0');
 		$('#loading-curframes').html('0');
-		$('#loading-totalframes').html('0');
+		$('#loading-totalframes').html(nTotalFrames);
 	
+		nLoadedFrames = 0;
 		LogMessage('Loading movie "' + sMovieName + '"');
+	}
+
+	function OnChangedAttrs() {
+		$('#loading-overlay').show();
+		$('#loading-name').html(sCurrentMovie);
+		$('#loading-percents').html('0');
+		$('#loading-curframes').html('0');
+		$('#loading-totalframes').html(nTotalFrames);
+		nLoadedFrames = 0;
+		LogMessage('Changed props, reloading movie');	
 	}
 
 	function OnMoviePropsLoaded(oProps) {
@@ -73,23 +84,13 @@ $(document).ready(function() {
 				$('#' + sID).append('<div class="attr-color" style="background-color: ' + oMovieProps.parts[p].variants[v]._color + ';" data-part="' + p + '" data-variant="' + v + '"></div>');				
 			}
 		}
-			
+
 		$('.attr-color').click(function(e) {
 			e.preventDefault();
 			var $self = $(this);
-			nLoadedFrames = 0;
 			OnChangedAttrs();
 			$('#canvas').betsey('changePartVariant', $self.data('part'), $self.data('variant'));
 		});
-	}
-
-	function OnChangedAttrs() {
-		$('#loading-overlay').show();
-		$('#loading-name').html(sCurrentMovie);
-		$('#loading-percents').html('0');
-		$('#loading-curframes').html('0');
-		$('#loading-totalframes').html('0');
-		LogMessage('Changed props, reloading movie');	
 	}
 
 	function OnLoadedFrame(nFrame) {
