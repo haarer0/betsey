@@ -152,9 +152,43 @@ $(document).ready(function() {
 		}
 
 		nLastDragTime = e.gesture.timestamp;
-		nLastX = nPos;	
-		$('#canvas').betsey(nDeltaX > 0 ? 'drawPrevFrame' : 'drawNextFrame');
+		nLastX = nPos;
+		DoRotate(nDeltaX < 0);
 	});
+
+	var nRotateTimer = 0;
+	$('#rotate-left').mousedown(function(e){
+		e.preventDefault();
+		StopRotate();
+		nRotateTimer = setInterval(function() {
+			DoRotate(false);
+		}, 30);		
+	});
+
+	$('#rotate-right').mousedown(function(e){
+		e.preventDefault();
+		StopRotate();
+		nRotateTimer = setInterval(function() {
+			DoRotate(true);
+		}, 30);		
+	});
+
+	$('#rotate-left, #rotate-right').mouseup(function(e) {
+		e.preventDefault();
+		StopRotate();
+	}).mouseout(function(e) {
+		e.preventDefault();
+		StopRotate();
+	});
+
+	function DoRotate(bIsRight) {
+		$('#canvas').betsey(bIsRight ? 'drawNextFrame' : 'drawPrevFrame');
+	}
+	function StopRotate() {
+		if (nRotateTimer) {
+			clearInterval(nRotateTimer);
+		}
+	}
 
 
 

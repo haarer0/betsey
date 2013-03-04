@@ -144,13 +144,25 @@ header {
 #zoom-in {
 	line-height: 33px;
 	top: 0px;
-	left: 5px;
+	left: 35px;
 }
 
 #zoom-out {
 	line-height: 27px;
-	top: 40px;
-	left: 5px;
+	top: 70px;
+	left: 35px;
+}
+
+#rotate-left {
+	line-height: 32px;
+	top: 35px;
+	left: 0px;
+}
+
+#rotate-right {
+	line-height: 32px;
+	top: 35px;
+	left: 70px;
 }
 
 .canvas-controls-button:hover {
