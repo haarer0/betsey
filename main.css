@@ -144,27 +144,13 @@ header {
 #zoom-in {
 	line-height: 33px;
 	top: 0px;
-	left: 35px;
+	left: 5px;
 }
 
 #zoom-out {
 	line-height: 27px;
-	top: 70px;
-	left: 35px;
-}
-
-#swipe-left {
-	top: 35px;
-	left: 0px;
-	font-size: 20px;
-	line-height: 32px;
-}
-
-#swipe-right {
-	top: 35px;
-	left: 70px;
-	font-size: 20px;
-	line-height: 32px;
+	top: 40px;
+	left: 5px;
 }
 
 .canvas-controls-button:hover {
@@ -206,4 +192,21 @@ header {
 	-webkit-box-shadow: 0px 0px 5px #999;
 	-moz-box-shadow:    0px 0px 5px #999;
 	box-shadow:         0px 0px 5px #999;
+}
+
+.swipe-controls {
+	display: inline-block;
+	margin-left: 30px;
+}
+
+.swipe-controls-caption {
+	color: #eee;
+	font-family: Arial;
+	font-size: 18px;
+}
+
+.swipe-controls-button {
+	display: inline-block;
+	height: 28px;
+	line-height: 25px;
 }

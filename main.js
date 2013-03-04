@@ -97,7 +97,6 @@ $(document).ready(function() {
 	$(document).bind('touchmove', function(e) {
 		e.preventDefault();
 	});
-
 	hHammer.on('dragstart', function(e) {
 		nLastDragTime = e.gesture.timestamp;
 		nLastX = e.gesture.center.pageX - e.target.offsetLeft;
@@ -122,8 +121,7 @@ $(document).ready(function() {
 		nLastDragTime = e.gesture.timestamp;
 		nLastX = nPos;	
 		$('#canvas').betsey(nDeltaX > 0 ? 'drawPrevFrame' : 'drawNextFrame');
-	})
-
+	});
 
 
 
@@ -138,6 +136,7 @@ $(document).ready(function() {
 		StopSwiping();
 	});
 
+/*
 	hHammer.on('swipe', function(e) {
 		StopSwiping();
 
@@ -148,6 +147,7 @@ $(document).ready(function() {
 
 		DoSwipe();
 	});
+	*/
 
 
 	$('#swipe-left').click(function(e) {
@@ -169,7 +169,7 @@ $(document).ready(function() {
 		StopSwiping();
 		DoSwipe();
 	});
-
+	
 	function StopSwiping() {
 		if (nSwipeTimer) {
 			clearTimeout(nSwipeTimer);
