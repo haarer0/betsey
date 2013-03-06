@@ -1,4 +1,7 @@
+/*v0.1.5 stable*/
 (function( $ ){
+	"use strict";
+
 	var _self = null,
 		_$canvas = null,
 		_nCanvasW = 0,
@@ -6,10 +9,10 @@
 		_hContext = null,
 		_sCurrentMovie = '',
 		_sCurrentPath = '',
-		_oCurrentParts = {},
 		_bIsMovieLoading = false,
-		_oMovieProperties = null,
-		_aFrames = {},
+		_aMovieProperties = {},
+		_aCurrentParts = {},
+		_aImgs = {},
 		_aEvents = {},
 		_nCurrentFrame = 0,
 		_nCurrentZoom = 1;
@@ -56,9 +59,7 @@
 			_nCanvasW = _$canvas.width();
 			_nCanvasH = _$canvas.height();
 
-			_oMovieProperties = null;
 			_sCurrentPath = '';
-			_aFrames = {};
 			_hContext = this[0].getContext('2d');
 			/*
 			if (options['movieName'] !== undefined) {
@@ -84,12 +85,12 @@
 		},
 
 		getPartVariants : function() {
-			return _oCurrentParts;
+			return _aCurrentParts[_sCurrentMovie];
 		},
 
 		drawNextFrame : function() {
 			var nPrevFrame = _nCurrentFrame++;
-			if (_nCurrentFrame >= _oMovieProperties['totalFrames']) {
+			if (_nCurrentFrame >= _aMovieProperties[_sCurrentMovie].totalFrames) {
 				_nCurrentFrame = 0;
 			}
 
@@ -101,7 +102,7 @@
 		drawPrevFrame : function() { 			
 			var nPrevFrame = _nCurrentFrame--;
 			if (_nCurrentFrame < 0) {
-				_nCurrentFrame = _oMovieProperties['totalFrames'] - 1;
+				_nCurrentFrame = _aMovieProperties[_sCurrentMovie].totalFrames - 1;
 			}
 
 			if (!_DrawFrame()) {
@@ -153,13 +154,21 @@
 			return;
 		}
 
-		_oMovieProperties = null;
-		_bIsMovieLoading = true;
 		_sCurrentMovie = sMovieName;
-			
 		_sCurrentPath = _settings['moviesRootURL'] + sMovieName;
-		_aImgs = {};
+			
+		_aImgs = _aImgs || {};
+		_aImgs[_sCurrentMovie] = _aImgs[_sCurrentMovie] || {};
+		_aMovieProperties = _aMovieProperties || {};
 
+		if (_aMovieProperties[sMovieName] !== undefined) {
+			_aEvents[_aRegisteredEventNames.F_ON_MOVIE_PROPS_LOADED](_aMovieProperties[sMovieName]);
+			_nCurrentFrame = _aMovieProperties[_sCurrentMovie].startFromFrame;
+			_PreloadFrames();
+			return;
+		}
+
+		_bIsMovieLoading = true;
 		$.getScript(_sCurrentPath + '/' + _settings['moviePropertiesFileName'])
 			.done(_OnLoadedMovie)
 			.fail(_OnLoadingMovieFailed);
@@ -167,13 +176,13 @@
 
 	function _OnLoadedMovie(sData, sTextStatus, jqxhr) {
 		_bIsMovieLoading = false;
-		_oMovieProperties = movieProperties;
-		_oCurrentParts = {};
+		_aMovieProperties[_sCurrentMovie] = movieProperties;
+		_aCurrentParts[_sCurrentMovie] = _aCurrentParts[_sCurrentMovie] || {};
 
-
-		for (var i in _oMovieProperties.parts) {
-			for (var ii in _oMovieProperties.parts[i].variants) {
-				_oCurrentParts[i] = ii;
+		_nCurrentFrame = _aMovieProperties[_sCurrentMovie].startFromFrame;
+		for (var i in _aMovieProperties[_sCurrentMovie].parts) {
+			for (var ii in _aMovieProperties[_sCurrentMovie].parts[i].variants) {
+				_aCurrentParts[_sCurrentMovie][i] = ii;
 				break;				
 			}
 		} 
@@ -188,19 +197,21 @@
 	}
 
 	function _ChangePart(sPartName, sVariant) {
-		_oCurrentParts[sPartName] = sVariant;
+		_aCurrentParts[_sCurrentMovie][sPartName] = sVariant;
 		_PreloadFrames();
 	}
 
 	function _GetImgFullPath(sPart, nFrame) {
-		return _sCurrentPath + '/images/' + sPart + '/' + _oCurrentParts[sPart] + '/' + nFrame + '.' + _oMovieProperties['fileExtensions'];	
+		return _sCurrentPath + '/images/' + sPart + '/' + _aCurrentParts[_sCurrentMovie][sPart] + '/' + nFrame + '.' + _aMovieProperties[_sCurrentMovie]['fileExtensions'];	
 	}
 
 	function _IsFrameExisted(nFrame) {
 		var bIsAllPartsReady = true;
-		if (_aImgs[nFrame] !== undefined) {
-			for (var i in _oMovieProperties['parts']) {
-				if (!bIsAllPartsReady || (_aImgs[nFrame][i] === undefined) || (_aImgs[nFrame][i][_oCurrentParts[i]] === undefined)) {
+		_aImgs[_sCurrentMovie] = _aImgs[_sCurrentMovie] || {};
+
+		if (_aImgs[_sCurrentMovie][nFrame] !== undefined) {
+			for (var i in _aMovieProperties[_sCurrentMovie].parts) {
+				if (!bIsAllPartsReady || (_aImgs[_sCurrentMovie][nFrame][i] === undefined) || (_aImgs[_sCurrentMovie][nFrame][i][_aCurrentParts[_sCurrentMovie][i]] === undefined)) {
 					bIsAllPartsReady = false;
 				}
 			}
@@ -213,10 +224,10 @@
 
 	function _PreloadFrames() {
 		var nPreloadedFrames = 0;
-		for (var i = 0; i < _oMovieProperties['totalFrames']; i++) {
+		for (var i = 0; i < _aMovieProperties[_sCurrentMovie].totalFrames; i++) {
 			_LoadFrame(i, function(nFrame) {
 				_aEvents[_aRegisteredEventNames.F_ON_FRAME_LOADED](nFrame);
-				if (++nPreloadedFrames >= _oMovieProperties['totalFrames']) {
+				if (++nPreloadedFrames >= _aMovieProperties[_sCurrentMovie].totalFrames) {
 					_aEvents[_aRegisteredEventNames.F_ON_ALL_FRAMES_LOADED]();
 					_DrawFrame();
 				}
@@ -236,21 +247,20 @@
 		var aImgsToLoad = {};
 		var nTotalToLoad = 0;
 		var nTotalLoaded = 0;
-		
-		_aImgs[nFrame] = _aImgs[nFrame] || {};
+		_aImgs[_sCurrentMovie][nFrame] = _aImgs[_sCurrentMovie][nFrame] || {};
 
-		for (var i in _oMovieProperties.parts) {
+		for (var i in _aMovieProperties[_sCurrentMovie].parts) {
 
-			if ((_oMovieProperties.parts[i].skip_frames !== undefined) && (_oMovieProperties.parts[i].skip_frames.indexOf(nFrame) !== -1)) {
+			if ((_aMovieProperties[_sCurrentMovie].parts[i].skip_frames !== undefined) && (_aMovieProperties[_sCurrentMovie].parts[i].skip_frames.indexOf(nFrame) !== -1)) {
 				continue;
 			}
 
 
-			_aImgs[nFrame][i] = _aImgs[nFrame][i] || {};
-			if (_aImgs[nFrame][i][_oCurrentParts[i]] === undefined) {
+			_aImgs[_sCurrentMovie][nFrame][i] = _aImgs[_sCurrentMovie][nFrame][i] || {};
+			if (_aImgs[_sCurrentMovie][nFrame][i][_aCurrentParts[_sCurrentMovie][i]] === undefined) {
 				aImgsToLoad[nFrame] = aImgsToLoad[nFrame] || {};
 				aImgsToLoad[nFrame][i] = aImgsToLoad[nFrame][i] || {};
-				aImgsToLoad[nFrame][i][_oCurrentParts[i]] = _GetImgFullPath(i, nFrame);
+				aImgsToLoad[nFrame][i][_aCurrentParts[_sCurrentMovie][i]] = _GetImgFullPath(i, nFrame);
 				nTotalToLoad++;
 			}
 		}				
@@ -269,9 +279,9 @@
 						var img = new Image();
 						img.onload = function() {
 							nTotalLoaded++;
-							_aImgs[nn] = _aImgs[nn] || {};
-							_aImgs[nn][kk] = _aImgs[nn][kk] || {};
-							_aImgs[nn][kk][jj] = img;
+							_aImgs[_sCurrentMovie][nn] = _aImgs[_sCurrentMovie][nn] || {};
+							_aImgs[_sCurrentMovie][nn][kk] = _aImgs[_sCurrentMovie][nn][kk] || {};
+							_aImgs[_sCurrentMovie][nn][kk][jj] = img;
 
 							if (nTotalLoaded >= nTotalToLoad) {
 								fCallback(nFrame);
@@ -286,7 +296,7 @@
 	}
 
 	function _ClearCanvas() {
-		_hContext.fillStyle = _oMovieProperties.background;
+		_hContext.fillStyle = _aMovieProperties[_sCurrentMovie].background;
 		_hContext.fillRect(0, 0, _nCanvasW, _nCanvasH);
 	}
 
@@ -305,12 +315,12 @@
 		var nNewH = _nCanvasH * _nCurrentZoom;
 		var nImgDrawn = 0;
 
-		for (var i in _oMovieProperties.parts) {
-			if ((_aImgs[nFrame] === undefined) || (_aImgs[nFrame][i] === undefined) || (_aImgs[nFrame][i][_oCurrentParts[i]] === undefined)) {
+		for (var i in _aMovieProperties[_sCurrentMovie].parts) {
+			if ((_aImgs[_sCurrentMovie][nFrame] === undefined) || (_aImgs[_sCurrentMovie][nFrame][i] === undefined) || (_aImgs[_sCurrentMovie][nFrame][i][_aCurrentParts[_sCurrentMovie][i]] === undefined)) {
 //console.log('frame does not exist ' + nFrame + ', part: '+  _oCurrentParts[i]);
 				continue;
 			}
-			_hContext.drawImage(_aImgs[nFrame][i][_oCurrentParts[i]], (_nCanvasW - nNewW) / 2, (_nCanvasH - nNewH) / 2, nNewW, nNewH);
+			_hContext.drawImage(_aImgs[_sCurrentMovie][nFrame][i][_aCurrentParts[_sCurrentMovie][i]], (_nCanvasW - nNewW) / 2, (_nCanvasH - nNewH) / 2, nNewW, nNewH);
 			nImgDrawn++;
 		}	
 

@@ -35,14 +35,14 @@ $(document).ready(function() {
 	$('#objMovie').change(function(e) {
 		e.preventDefault();
 
-		sCurrentMovie = $('#objMovie').val();
-		$('#canvas').betsey('loadMovie', $(this).value());		
+		sCurrentMovie = $('#objMovie').val();	
 		OnBeginLoadingMovie(sCurrentMovie);
+		$('#canvas').betsey('loadMovie', sCurrentMovie);
 	});
 
 	function OnBeginLoadingMovie(sMovieName) {
 		StopAllAnimation();
-		
+
 		$('#loading-overlay').show();
 		$('#loading-name').html(sMovieName);
 		$('#loading-percents').html('0');
