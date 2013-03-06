@@ -41,6 +41,8 @@ $(document).ready(function() {
 	});
 
 	function OnBeginLoadingMovie(sMovieName) {
+		StopAllAnimation();
+		
 		$('#loading-overlay').show();
 		$('#loading-name').html(sMovieName);
 		$('#loading-percents').html('0');
@@ -52,12 +54,15 @@ $(document).ready(function() {
 	}
 
 	function OnChangedAttrs() {
+		StopAllAnimation();
+
 		$('#loading-overlay').show();
 		$('#loading-name').html(sCurrentMovie);
 		$('#loading-percents').html('0');
 		$('#loading-curframes').html('0');
 		$('#loading-totalframes').html(nTotalFrames);
-		nLoadedFrames = 0;
+
+		nLoadedFrames = 0;		
 		LogMessage('Changed props, reloading movie');	
 	}
 
@@ -112,7 +117,10 @@ $(document).ready(function() {
 	}
 
 
-
+	function StopAllAnimation(){
+		StopSwiping();
+		StopRotate();
+	}
 
 
 
