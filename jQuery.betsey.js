@@ -240,6 +240,12 @@
 		_aImgs[nFrame] = _aImgs[nFrame] || {};
 
 		for (var i in _oMovieProperties.parts) {
+
+			if ((_oMovieProperties.parts[i].skip_frames !== undefined) && (_oMovieProperties.parts[i].skip_frames.indexOf(nFrame) !== -1)) {
+				continue;
+			}
+
+
 			_aImgs[nFrame][i] = _aImgs[nFrame][i] || {};
 			if (_aImgs[nFrame][i][_oCurrentParts[i]] === undefined) {
 				aImgsToLoad[nFrame] = aImgsToLoad[nFrame] || {};
@@ -302,7 +308,7 @@
 		for (var i in _oMovieProperties.parts) {
 			if ((_aImgs[nFrame] === undefined) || (_aImgs[nFrame][i] === undefined) || (_aImgs[nFrame][i][_oCurrentParts[i]] === undefined)) {
 //console.log('frame does not exist ' + nFrame + ', part: '+  _oCurrentParts[i]);
-				return false;
+				continue;
 			}
 			_hContext.drawImage(_aImgs[nFrame][i][_oCurrentParts[i]], (_nCanvasW - nNewW) / 2, (_nCanvasH - nNewH) / 2, nNewW, nNewH);
 			nImgDrawn++;

@@ -161,7 +161,7 @@ $(document).ready(function() {
 		e.preventDefault();
 		StopRotate();
 		nRotateTimer = setInterval(function() {
-			DoRotate(false);
+			DoRotate(true);
 		}, 30);		
 	});
 
@@ -169,7 +169,7 @@ $(document).ready(function() {
 		e.preventDefault();
 		StopRotate();
 		nRotateTimer = setInterval(function() {
-			DoRotate(true);
+			DoRotate(false);
 		}, 30);		
 	});
 
